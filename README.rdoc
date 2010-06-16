@@ -103,6 +103,4 @@ Use it at your own risk, bitches!
 
 == LICENSE
 
-Copyright (c) 2010 John Metta
-
-Which one?
+MIT Style. See LICENSE.txt
