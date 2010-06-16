@@ -124,6 +124,24 @@ class Passfish
       true # numeric
     end
   end
-
 end
 
+if __FILE__ == $0
+  passfish1 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!"
+  passfish2 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze"
+  passfish3 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :passphrase => "but Jennifer Grey is hot"
+  passfish4 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze", :passphrase => "but Jennifer Grey is hot"
+  passfish5 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze", :passphrase => "but Jennifer Grey is hot", :length => 13
+
+  pass1 = passfish1.generate
+  pass2 = passfish2.generate
+  pass3 = passfish3.generate
+  pass4 = passfish4.generate
+  pass5 = passfish5.generate
+  
+  puts pass1
+  puts pass2
+  puts pass3
+  puts pass4
+  puts pass5
+end

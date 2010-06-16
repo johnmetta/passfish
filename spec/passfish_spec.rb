@@ -186,6 +186,22 @@ describe Passfish do
         pending
       end
     end
+    
+    describe "the all important backward compatibility" do
+      it "should faithfully recreate passwords that were created on day one" do
+        passfish1 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!"
+        passfish2 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze"
+        passfish3 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :passphrase => "but Jennifer Grey is hot"
+        passfish4 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze", :passphrase => "but Jennifer Grey is hot"
+        passfish5 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze", :passphrase => "but Jennifer Grey is hot", :length => 13
+      
+        passfish1.generate.should == '#!(?0|$2'
+        passfish2.generate.should == '(|@+#^7b'
+        passfish3.generate.should == '9!b%e+70'
+        passfish4.generate.should == '5+b(*|$1'
+        passfish5.generate.should == '5+b(*|$1e8+8@'
+      end
+    end
   end
   describe "given an invalid key" do
   end
