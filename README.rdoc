@@ -1,17 +1,108 @@
-= passfish
+= Passfish
 
-Description goes here.
+This is an experimental attempt to create a password generator that does the following:
 
-== Note on Patches/Pull Requests
- 
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+* Removes the single point of failure (e.g. "Master" password) vulnerability
+* Removes the need to store passwords (even in encrypted files) 
+* Generates strong passwords that are really strong, not "grandma remembers it"-strong
+* Provides a way for grandma to remember it
+* Provides an easy, yet secure, way to recreate the password
 
-== Copyright
+Yeah, I know. It's crazy.
 
-Copyright (c) 2010 John Metta. See LICENSE for details.
+== Quick Synopsis
+
+You have a private key on your computer/device, and you remember a single passphrase-- such as the name of your least favorite movie:
+
+$ passfish -i "work email"
+>> Enter passphrase: Dirty Dancing <enter>
+>> 7|>:Zr}iB5
+
+Your password is not stored ANYWHERE-- not even in an encrypted file. But you can always get it, you can write "name@email.com" on your forehead to remind you what your password is, and no-one else can get it from you unless they they do ALL of the following:
+
+* Become savvy enough to know what the hell Passfish is (not bloody likely)
+* Know that you call your email account "work email" (you might write this one down, right?)
+* Steal your computer and/or your private key file (this one's possible but unlikely)
+* Remember that you really freakin' hate the movie "Dirty Dancing" (okay, maybe don't use something EVERYONE knows you hate)
+
+Voilá! Easy for you to get rockin' good passwords, hard as hell for the monkeys to break them.
+
+=== Status
+
+I got nothin'!!
+
+Right now, it's just a smashing good idea, but has not been built. I'm still playing with the Blowfish algorithm.
+
+== The Larger Problem
+
+Imagine you administer a site/computer/application, but log in rarely. The system does not use SSL encryption with a private key (or if they do, you're afraid you'll lose/rebuild your private key, thereby needing the password anyway). For whatever reason, you are left generating a password. Your options are:
+
+* A: Generate a unique strong, 12-character password that you somehow remember (possible for savants)
+* B: Use a password generator (try remembering the passwords)
+* C: Use a strong password that you use frequently (just because we all do it doesn't mean it's a good idea)
+* D: Use a simple password like "hackme" (Mom, that's a really bad idea!)
+* E: Use a password storage program like 1Password (good, but there's still a single point of entry for all your passwords)
+
+There are problems with all of these. The first is functionally unobtainable for most of us, the second is good provided the password is stored somewhere My goal is to develop a way to use a simple password, combined with aspects of the system and with an encryption key and optional user-defined hash, to generate a repeatable password.
+
+=== A Possible Solution
+
+I volunteer at a radio station and administer a computer. I forget the password to the computer, which I've made really strong, but haven't written down somewhere. Rather than remember the password, I need only remember the computer's name and use that as the "identifier":
+
+$ passfish -i "Station1" > s$he8id8*$!hE4 
+
+The desire is that I can type "Station1" on my laptop/Android phone/whatever, and get the password, but that the password is not stored anywhere. It's generated in a repeatable fashion using a key and the Blowfish algorithm and then immediately thrown away.
+
+=== Enhanced Repeatable Security
+
+The beauty of this solution is that I'm using strong passwords, can get to them when I need to, without saving them somewhere, but there is no single point of failure. Using a password manager means that if someone gets their hands on your private key, they have effectively stolen all your passwords. Using this approach, someone stealing your private key is pointless because they don't have the identifier you use for each system. And someone who knows your identifier still can't repeatably generate your password.
+
+This allows you to generate passwords such as
+
+$ passfish -i "name@email.com" > 7|>:Zr}iB5
+
+or with some identifiable phrase
+
+$ passfish -i "office computer" > sk{7r:]2'u
+
+=== Passphrases
+
+You can add additional security with passphrases. A passphrase is something that you set, it is stored in a hash on the device you are using, and must be reproduced when you run passfish:
+
+$ passfish -i "work email"
+>> Enter passphrase: Abbey Road
+>> 8U}m$eR,
+
+=== Names
+
+But wait! There's More!!
+
+$ passfish -i "radio" -n "rama"
+>> Enter passphrase: God I hate Dirty Dancing!
+>> $nq'gy>bW
+
+$ passfish -i "radio" -n "kali"
+>> Enter passphrase: God I hate Dirty Dancing!
+>> vA]qbF~{
+
+Amazing! Now you have the same identifier for everything at that location, and the name is just the name of the "thing" at that location. An attacker has to know the identifier, that you actually used a name, what the name is, that you used a passphrase, what the passphrase is, AND they have to have your key!
+
+Eat My Junk, Attacker!!
+
+=== Passwords your mom can remember
+
+My mother's online banking password was the name of her cat, and it was written down on a piece of paper and taped to the wall above the computer. With a system like Passfish, she could write the identifier down, remember a single passphrase for everything in her head, and yet generate highly secure passwords.
+
+== Cryptographic Quality Guarantee
+
+Are you freakin' kidding me? I don't guarantee anything! There's probably some pasty-faced 14-year old savant in Illinois who can figure out some arcane mathematical reason why this strategy is easy to break, and can prove it by re-creating Passfish passwords in his head while playing Warcraft.
+
+Seriously, I'm not a cryptographer, I don't play one on TV. I came up with this whole stinking scheme while drinking beers at the pub!
+
+Use it at your own risk, bitches!
+
+== LICENSE
+
+Copyright (c) 2010 John Metta
+
+Which one?
