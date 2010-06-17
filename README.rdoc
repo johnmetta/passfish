@@ -39,13 +39,13 @@ Seriously, I'm not a cryptographer, I don't play one on TV. I came up with this 
 
 Use it at your own risk, bitches!
 
-=== Status
+== Status
 
 I got nothin'!!
 
 Right now, it's just a smashing good idea, but has not been built. I'm still playing with the Blowfish algorithm.
 
-=== Current Algorithm (subject to change on a whim at this point)
+== Current Algorithm (subject to change on a whim at this point)
 
 Here's a quick synopsis of what we do:
 
