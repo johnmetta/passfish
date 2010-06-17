@@ -90,9 +90,23 @@ class Passfish
       File.read(@keypath)
   end
 
-  def make_hash_string; (Digest::SHA2.new << combine_params).to_s; end
+  def make_hash_string
+    #TODO: Here's a major point of weakness. 
+    # I think that SHA keys might not have
+    # enough entropy because they don't have a full suite of characters- limited to hex.
+    # We need a digest scheme with more entropy
+    # Encryption is an attractive direction, but the by directional nature has
+    # randomness in such a way that repeatability is not possible. Need to find other options.
+    (Digest::SHA2.new << combine_params).to_s
+  end
 
-  def combine_params; @identifier + @key + @name + @passphrase; end
+  def combine_params
+    # TODO: Come up with a more sophisticated way to use passphrase at least!
+    # Better, come up with ways to use name, key AND passphrase that increase
+    # the entropy of the algorithm as a whole, rather than just increasing the
+    # hash string length.
+    @identifier + @key + @name + @passphrase
+  end
 
   def generate
     str = make_hash_string
@@ -127,21 +141,5 @@ class Passfish
 end
 
 if __FILE__ == $0
-  passfish1 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!"
-  passfish2 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze"
-  passfish3 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :passphrase => "but Jennifer Grey is hot"
-  passfish4 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze", :passphrase => "but Jennifer Grey is hot"
-  passfish5 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze", :passphrase => "but Jennifer Grey is hot", :length => 13
-
-  pass1 = passfish1.generate
-  pass2 = passfish2.generate
-  pass3 = passfish3.generate
-  pass4 = passfish4.generate
-  pass5 = passfish5.generate
-  
-  puts pass1
-  puts pass2
-  puts pass3
-  puts pass4
-  puts pass5
+  #TODO: throw in some passwords to generate for backward compatibility to add to the testing suite when things stablize
 end
