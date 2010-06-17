@@ -1,6 +1,6 @@
 = Passfish
 
-This is an experimental attempt to create a password generator that does the following:
+This is an experimental attempt to create a password manager that's not a manager, but a generator.
 
 * Removes the single point of failure (e.g. "Master" password) vulnerability
 * Removes the need to store passwords (even in encrypted files) 
@@ -14,80 +14,18 @@ Yeah, I know. It's crazy.
 
 You have a private key on your computer/device, and you remember a single passphrase-- such as the name of your least favorite movie:
 
-$ passfish -i "work email"
->> Enter passphrase: Dirty Dancing <enter>
->> 7|>:Zr}iB5
+
+ $ passfish -i "work email" -p "Dirty Dancing" <enter>
+ 7|>:Zr}iB5
 
 Your password is not stored ANYWHERE-- not even in an encrypted file. But you can always get it, you can write "name@email.com" on your forehead to remind you what your password is, and no-one else can get it from you unless they they do ALL of the following:
 
 * Become savvy enough to know what the hell Passfish is (not bloody likely)
 * Know that you call your email account "work email" (you might write this one down, right?)
 * Steal your computer and/or your private key file (this one's possible but unlikely)
-* Remember that you really freakin' hate the movie "Dirty Dancing" (okay, maybe don't use something EVERYONE knows you hate)
+* Remember that you really freakin' hate the movie "Dirty Dancing" (okay, maybe don't use something everyone KNOWS you hate)
 
-Voilá! Easy for you to get rockin' good passwords, hard as hell for the monkeys to break them.
-
-=== Status
-
-I got nothin'!!
-
-Right now, it's just a smashing good idea, but has not been built. I'm still playing with the Blowfish algorithm.
-
-== The Larger Problem
-
-Imagine you administer a site/computer/application, but log in rarely. The system does not use SSL encryption with a private key (or if they do, you're afraid you'll lose/rebuild your private key, thereby needing the password anyway). For whatever reason, you are left generating a password. Your options are:
-
-* A: Generate a unique strong, 12-character password that you somehow remember (possible for savants)
-* B: Use a password generator (try remembering the passwords)
-* C: Use a strong password that you use frequently (just because we all do it doesn't mean it's a good idea)
-* D: Use a simple password like "hackme" (Mom, that's a really bad idea!)
-* E: Use a password storage program like 1Password (good, but there's still a single point of entry for all your passwords)
-
-There are problems with all of these. The first is functionally unobtainable for most of us, the second is good provided the password is stored somewhere My goal is to develop a way to use a simple password, combined with aspects of the system and with an encryption key and optional user-defined hash, to generate a repeatable password.
-
-=== A Possible Solution
-
-I volunteer at a radio station and administer a computer. I forget the password to the computer, which I've made really strong, but haven't written down somewhere. Rather than remember the password, I need only remember the computer's name and use that as the "identifier":
-
-$ passfish -i "Station1" > s$he8id8*$!hE4 
-
-The desire is that I can type "Station1" on my laptop/Android phone/whatever, and get the password, but that the password is not stored anywhere. It's generated in a repeatable fashion using a key and the Blowfish algorithm and then immediately thrown away.
-
-=== Enhanced Repeatable Security
-
-The beauty of this solution is that I'm using strong passwords, can get to them when I need to, without saving them somewhere, but there is no single point of failure. Using a password manager means that if someone gets their hands on your private key, they have effectively stolen all your passwords. Using this approach, someone stealing your private key is pointless because they don't have the identifier you use for each system. And someone who knows your identifier still can't repeatably generate your password.
-
-This allows you to generate passwords such as
-
-$ passfish -i "name@email.com" > 7|>:Zr}iB5
-
-or with some identifiable phrase
-
-$ passfish -i "office computer" > sk{7r:]2'u
-
-=== Passphrases
-
-You can add additional security with passphrases. A passphrase is something that you set, it is stored in a hash on the device you are using, and must be reproduced when you run passfish:
-
-$ passfish -i "work email"
->> Enter passphrase: Abbey Road
->> 8U}m$eR,
-
-=== Names
-
-But wait! There's More!!
-
-$ passfish -i "radio" -n "rama"
->> Enter passphrase: God I hate Dirty Dancing!
->> $nq'gy>bW
-
-$ passfish -i "radio" -n "kali"
->> Enter passphrase: God I hate Dirty Dancing!
->> vA]qbF~{
-
-Amazing! Now you have the same identifier for everything at that location, and the name is just the name of the "thing" at that location. An attacker has to know the identifier, that you actually used a name, what the name is, that you used a passphrase, what the passphrase is, AND they have to have your key!
-
-Eat My Junk, Attacker!!
+Voilá! Easy for you to get rockin' good passwords, easy to re-create, hard as hell for the monkeys to break them.
 
 === Passwords your mom can remember
 
@@ -100,6 +38,53 @@ Are you freakin' kidding me? I don't guarantee anything! There's probably some p
 Seriously, I'm not a cryptographer, I don't play one on TV. I came up with this whole stinking scheme while drinking beers at the pub!
 
 Use it at your own risk, bitches!
+
+=== Status
+
+I got nothin'!!
+
+Right now, it's just a smashing good idea, but has not been built. I'm still playing with the Blowfish algorithm.
+
+=== Current Algorithm (subject to change on a whim at this point)
+
+Here's a quick synopsis of what we do:
+
+Passfish can take the following parameters:
+* identifier: (Mandatory) your "easy to remember, plain-texty password"
+* key: (Mandatory) Your private key, can be encrypted file, paragraph from a book, or a single word.
+* name: Optional identifier associated with the password
+* passphrase: Optional passphrase associated with the password
+* length: Length of the returned password, defaulting at 8 characters
+
+Given these, the program goes through the following byzantine steps:
+
+* Make sure there's a keyfile, or key given as parameter, and read it into a string
+* If there's a passphrase:
+  * Make a SHA hash of the passphrase
+  * Take the 4th and the 2nd characters and multipy them
+  * "Spin" (i.e. left shift) the key n characters where in is the multiple above
+* Combine the identifier and key into a single string
+* Create an SHA2 key of the combined string. It's possible to have an identifier like "test" and a key like "mykey," so making a SHA hash of this gives us a string with enough length to work well.
+* Encode the hash as a Base64 string (to increase the variety of characters present (i.e. upper and lower case))
+* Replacement:
+  * There is a list of letters and a list of punctuation characters, each 26 characters long.
+  * The 0th number present in the base64 string is stored as a "spin index"
+  * The 4th number present in the base64 string is stored as another spin index
+  * The 2nd number present in the base64 string is stored as another spin index
+  * The list of characters are shifted n + m + o times, where n, m, and o are the spin indices (Since there are 26 characters, I wanted to be able to spin through the end of the sequence)
+  * Then a dictionary is built with pairs for all letters/punctuation where key = letters[i] and value = punctuation[i]
+  * Every other repeated-capitalized letter is replaced with a punctuation character (e.g. A..A..A would become A..&..A or some such ching. Aagain, increasing variability of output)
+* This "noisy hash" is an 87 character string of upper, lower, numbers and punctuation is our identifier hash based on the spun key (i.e. key and passphrase) and the identifier
+* If a name is given:
+  * Make a SHA hash of the name
+  * Take the 4th and 2nd characters and multiply them
+  * Spin the noisy hash n characters, where n is the multiple above
+* An index is generated by adding the 4th and 2nd integers found in the key hash
+* The resulting password is a substring of the noisy hash, starting from that index, and continuing for the number characters specified in the length parameter (defaulting to 8)
+
+Wow! Doesn't that sound convoluted? The best thing about it is that it's probably supremely crackable. But as
+an initial run through, it seems like a decent way to combine multiple, possibly compromised, parameters
+in such a way that a repeatable, but still sufficiently complex and secure, password can be generated.
 
 == LICENSE
 

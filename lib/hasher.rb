@@ -1,19 +1,24 @@
 require 'digest/sha2'
 require 'base64'
 require 'lib/nth_integer'
+require 'lib/wheel_of_fortune'
 
 class Hasher  
-  
+  include WheelOfFortune  
   def initialize str
     # 26 characters + 10 numerals + 26 punctuation marks equals
     # 2.2e14 combinations for an 8 character sequence
     # Add uppercase characters and you have 3.6e15 combinations.
-    @letters = %w{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
-    @chars   = %w{! @ # $ % ^ & * ( ) _ - + = [ ] | / ? : ; < > , . ~}
     @word = str
     @base64 = base64_hash
-    # Generate spin indexes from the hash using the last numeral found
-    spin_chars! @base64.to_s.nth_i -1
+    @letters = %w{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
+    # Generate spin indexes from the hash using the answer to the ultimate
+    # question in the universe
+    spin = []
+    [0,4,2].each do |i|
+      spin << @base64.to_s.nth_i(i)
+    end
+    @chars   = spin(%w{! @ # $ % ^ & * ( ) _ - + = [ ] | / ? : ; < > , . ~}, spin)
   end    
   
   def base64_hash
@@ -21,12 +26,6 @@ class Hasher
     # convert that to Base64 to increase the character variation
     # Note: We strip the trailing equal signs and newline from the string.
     Base64.encode64(@word.sha)[0..-4]
-  end
-
-  def spin_chars! n
-    (0...n).each do
-      @chars << @chars.shift
-    end
   end
 
   def noise; @noise ||= get_noise; end
@@ -73,6 +72,6 @@ class Hasher
 end
 
 if __FILE__ == $0
-  hasher = Hasher.new "mettadore"
+  hasher = Hasher.new "mettadorea"
   p hasher.hash
 end

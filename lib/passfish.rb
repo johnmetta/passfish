@@ -30,11 +30,13 @@
 #   http://www.opensource.org/licenses/mit-license.php
 
 require 'lib/hasher'
+require 'lib/wheel_of_fortune'
 require 'digest/sha2'
 require 'etc'
 require 'openssl'
 
 class Passfish
+  include WheelOfFortune
   attr_accessor :key, :passphrase, :name, :identifier, :length
   def initialize identifier, options = {}
     @home = Etc.getpwuid.dir
@@ -43,12 +45,21 @@ class Passfish
     @keypath = File.join(@home, @passfishdir, @keyfile)
     @identifier = identifier
     raise "You need an identifier to generate a password" if not @identifier
-    @key = get_key options[:key]
-    @passphrase = 'passphrase' + options[:passphrase] if options[:passphrase]
-    @name = 'name' + options[:name] if options[:name]
+    @passphrase = options[:passphrase]
+    # If there's a passphrase, spin the key based on that, otherwise, use it as given
+    key = get_key(options[:key])
+    if @passphrase
+      @key = spin(key.split(//), passphrase_spin).join
+    else
+      @key = key
+    end
+    @name = options[:name]
     @length = options[:length] || 8
   end
 
+  def name_spin; @name.sha.nth_i(4) * @name.sha.nth_i(2) if @name; end
+  def passphrase_spin; @passphrase.sha.nth_i(4) * @passphrase.sha.nth_i(2) if @passphrase; end
+  
   def get_key key
     begin
       key || File.read(@keypath)
@@ -77,32 +88,6 @@ class Passfish
       File.read(@keypath)
   end
 
-  def get_spin
-    # Create spin indices based on the answer to the ultimate question in the universe
-    # TODO: This is probably a point of weakness, since we can spin things so far
-    spin = []
-    spin << @name.sha.nth_i(4) + @name.sha.nth_i(2) if @name
-    spin << @passphrase.sha.nth_i(4) + @passphrase.sha.nth_i(2) if @passphrase
-    p spin
-    spin
-  end
-  
-  def wheel_of_fortune arr, spin
-    begin
-      spin.each do |sp|
-        (0...sp).each do
-          arr << arr.shift
-        end
-      end
-    rescue
-      (0..sp).each do
-        arr << arr.shift
-      end
-    end
-    arr
-  end
-    
-  
   def hashify str
     Hasher.new(str).hash
   end
@@ -110,8 +95,8 @@ class Passfish
   def generate
     # Generate an index based on the key. 
     # TODO: Weakness? This will be the same for all passwords with this key
-    index = @key.sha.nth_i -1
-    hash = wheel_of_fortune hashify(@identifier + @key).split(//), get_spin
+    index = @key.sha.nth_i(4) + @key.sha.nth_i(2)
+    hash = spin hashify(@identifier + @key).split(//), get_name_spin
     hash.join[index...(index + @length)]
   end
  
