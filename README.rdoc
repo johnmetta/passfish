@@ -89,8 +89,7 @@ in such a way that a repeatable, but still sufficiently complex and secure, pass
 
 == Issues and Future
 
-* Test coverage is seriously lacking. Plus, I've not really thought of a good testing strategy. The problem is that we have to, say, test that a given password is not repeatable with different parameters, but you can't really test for that easily because
-absences of evidence is not evidence of absence.
+* Test coverage is seriously lacking. Plus, I've not really thought of a good testing strategy. The problem is that we have to, say, test that a given password is not repeatable with different parameters, but you can't really test for that easily because absences of evidence is not evidence of absence.
 * Apps: The plan is to include the following
   * Shell script that will take parameters, as well as details on how to make your shell's history ignore this command (so someone can't just see what you typed)
   * LaunchBar script that will take parameters and copy the resulting password to the clipboard without showing it
