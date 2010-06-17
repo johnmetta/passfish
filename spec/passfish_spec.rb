@@ -9,18 +9,6 @@ describe Passfish do
   end
   
   describe "basic methods" do
-    describe "is_numeric?" do
-      before do
-        @passfish = Passfish.new "test", :key => 'abc123'
-      end
-      it "should return true for an integer string" do
-          @passfish.is_numeric?("3").should be_true
-      end
-      it "should return false for a non-numeric string" do
-          @passfish.is_numeric?("/").should be_false
-          @passfish.is_numeric?("p").should be_false
-      end
-    end
     
     describe "get_key" do
       it "should return a the correct key given the --key or -k commandline option" do
@@ -32,41 +20,18 @@ describe Passfish do
       it "should read a previously generated keyfile correctly"
     end
     
-    describe "combine_params" do
-      it "Should combine with only a key" do
-        passfish = Passfish.new "test", :key => 'abc123'
-        passfish.combine_params.should == "testabc123"
-      end
-      it "should combine with a key and a name" do
-        passfish = Passfish.new "test", :key => 'abc123', :name => 'a test'
-        passfish.combine_params.should == "testabc123a test"
-      end
-      it "should combine with a key and a passphrase" do
-        passfish = Passfish.new "test", :key => 'abc123', :passphrase => 'a contrived example'
-        passfish.combine_params.should == "testabc123a contrived example"
-      end
-      it "should combine with a key, passphrase and name" do      
-        passfish = Passfish.new "test", :key => 'abc123', :name => 'a test', :passphrase => 'a contrived example'
-        passfish.combine_params.should == "testabc123a testa contrived example"
-      end
-    end
-
     describe "make_hash_string" do
       it "Should make a valid hash with only a key" do
-        passfish = Passfish.new "test", :key => 'abc123'
-        passfish.make_hash_string.should == (Digest::SHA2.new << "testabc123").to_s
+        pending #passfish = Passfish.new "test", :key => 'abc123'
       end
       it "should make a valid hash with a key and a name" do
-        passfish = Passfish.new "test", :key => 'abc123', :name => 'a test'
-        passfish.make_hash_string.should == (Digest::SHA2.new << "testabc123a test").to_s
+        pending #passfish = Passfish.new "test", :key => 'abc123', :name => 'a test'
       end
       it "should make a valid hash with a key and a passphrase" do
-        passfish = Passfish.new "test", :key => 'abc123', :passphrase => 'a contrived example'
-        passfish.make_hash_string.should == (Digest::SHA2.new << "testabc123a contrived example").to_s
+        pending #passfish = Passfish.new "test", :key => 'abc123', :passphrase => 'a contrived example'
       end
       it "should make a valid hash with a key, passphrase and name" do      
-        passfish = Passfish.new "test", :key => 'abc123', :name => 'a test', :passphrase => 'a contrived example'
-        passfish.make_hash_string.should == (Digest::SHA2.new << "testabc123a testa contrived example").to_s
+        pending #passfish = Passfish.new "test", :key => 'abc123', :name => 'a test', :passphrase => 'a contrived example'
       end
     end
     
@@ -189,17 +154,7 @@ describe Passfish do
     
     describe "the all important backward compatibility" do
       it "should faithfully recreate passwords that were created on day one" do
-        passfish1 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!"
-        passfish2 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze"
-        passfish3 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :passphrase => "but Jennifer Grey is hot"
-        passfish4 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze", :passphrase => "but Jennifer Grey is hot"
-        passfish5 = Passfish.new "test", :key => "I freakin hate Dirty Dancing!!", :name => "Swayze", :passphrase => "but Jennifer Grey is hot", :length => 13
-      
-        passfish1.generate.should == '#!(?0|$2'
-        passfish2.generate.should == '(|@+#^7b'
-        passfish3.generate.should == '9!b%e+70'
-        passfish4.generate.should == '5+b(*|$1'
-        passfish5.generate.should == '5+b(*|$1e8+8@'
+        pending
       end
     end
   end

@@ -29,10 +29,11 @@
 #   Copyright (c) 2007 YourName. Licensed under the MIT License:
 #   http://www.opensource.org/licenses/mit-license.php
 
-require 'lib/passfish'
+require 'lib/hasher'
 require 'digest/sha2'
 require 'etc'
 require 'openssl'
+
 class Passfish
   attr_accessor :key, :passphrase, :name, :identifier, :length
   def initialize identifier, options = {}
@@ -43,23 +44,9 @@ class Passfish
     @identifier = identifier
     raise "You need an identifier to generate a password" if not @identifier
     @key = get_key options[:key]
-    @passphrase = options[:passphrase] || ''
-    @name = options[:name] || ''
+    @passphrase = 'passphrase' + options[:passphrase] if options[:passphrase]
+    @name = 'name' + options[:name] if options[:name]
     @length = options[:length] || 8
-    @noise = {'a' => '@',
-             'b' => '(',
-             'c' => ')',
-             'd' => '&',
-             'e' => '%',
-             'f' => '!',
-             '1' => '/',
-             '2' => '|',
-             '3' => '#',
-             '4' => '*',
-             '5' => '?',
-             '6' => '$',
-             '8' => '+',
-             '9' => '^'}
   end
 
   def get_key key
@@ -90,56 +77,47 @@ class Passfish
       File.read(@keypath)
   end
 
-  def make_hash_string
-    #TODO: Here's a major point of weakness. 
-    # I think that SHA keys might not have
-    # enough entropy because they don't have a full suite of characters- limited to hex.
-    # We need a digest scheme with more entropy
-    # Encryption is an attractive direction, but the by directional nature has
-    # randomness in such a way that repeatability is not possible. Need to find other options.
-    (Digest::SHA2.new << combine_params).to_s
+  def get_spin
+    # Create spin indices based on the answer to the ultimate question in the universe
+    # TODO: This is probably a point of weakness, since we can spin things so far
+    spin = []
+    spin << @name.sha.nth_i(4) + @name.sha.nth_i(2) if @name
+    spin << @passphrase.sha.nth_i(4) + @passphrase.sha.nth_i(2) if @passphrase
+    p spin
+    spin
   end
-
-  def combine_params
-    # TODO: Come up with a more sophisticated way to use passphrase at least!
-    # Better, come up with ways to use name, key AND passphrase that increase
-    # the entropy of the algorithm as a whole, rather than just increasing the
-    # hash string length.
-    @identifier + @key + @name + @passphrase
+  
+  def wheel_of_fortune arr, spin
+    begin
+      spin.each do |sp|
+        (0...sp).each do
+          arr << arr.shift
+        end
+      end
+    rescue
+      (0..sp).each do
+        arr << arr.shift
+      end
+    end
+    arr
+  end
+    
+  
+  def hashify str
+    Hasher.new(str).hash
   end
 
   def generate
-    str = make_hash_string
-    seen = [] #how many times have we seen a character?
-    index = 0 #Just store a number that'll always be the same to use as an index
-
-    # split the hash and replace every other value with the values from noise and update the
-    # index value if it's an integer. This merely takes the given hash and adds some entropy
-    # to it in a repeatable way
-    str.split('').each_with_index do |ch, i|
-      if seen.count(ch) % 2 == 0
-        str[i] = @noise[ch] ? @noise[ch] : ch
-      end
-      seen << ch
-      index = ch.to_i if is_numeric? ch
-    end
-    # return a @length long string starting at the index given by the last integer in the hash
-    # This is the password that is secure with high (psuedo-)entropy, but which can be regenerated
-    # given all the necessary information.
-    str[index...(index + @length)]
+    # Generate an index based on the key. 
+    # TODO: Weakness? This will be the same for all passwords with this key
+    index = @key.sha.nth_i -1
+    hash = wheel_of_fortune hashify(@identifier + @key).split(//), get_spin
+    hash.join[index...(index + @length)]
   end
  
-  def is_numeric? s
-    begin
-      Float(s)
-    rescue
-      false # not numeric
-    else
-      true # numeric
-    end
-  end
 end
 
 if __FILE__ == $0
-  #TODO: throw in some passwords to generate for backward compatibility to add to the testing suite when things stablize
+  passfish = Passfish.new "mettadore", :key => 'abc123', :name => "test", :length => 20
+  p passfish.generate
 end
