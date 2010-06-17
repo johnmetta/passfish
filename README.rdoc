@@ -89,15 +89,14 @@ in such a way that a repeatable, but still sufficiently complex and secure, pass
 
 == Issues and Future
 
-1. Test coverage is seriously lacking. Plus, I've not really thought of a good testing strategy. The problem is that we have to,
-say, test that a given password is not repeatable with different parameters, but you can't really test for that easily because
+* Test coverage is seriously lacking. Plus, I've not really thought of a good testing strategy. The problem is that we have to, say, test that a given password is not repeatable with different parameters, but you can't really test for that easily because
 absences of evidence is not evidence of absence.
-2. Apps: The plan is to include the following:
+* Apps: The plan is to include the following
   * Shell script that will take parameters, as well as details on how to make your shell's history ignore this command (so someone can't just see what you typed)
   * LaunchBar script that will take parameters and copy the resulting password to the clipboard without showing it
   * Android app (I don't have an iPhone, so will not undertake that)
   * Setup script that will make sure your keyfile is generated (and, if desired, reproduceable so that you can use it on other computers/devices)
-3. Review: When the algorithm stabilizes, I'll ask some of my smarter friends to look at it and make sure there's not some glaringly obvious flaw
+* Review: When the algorithm stabilizes, I'll ask some of my smarter friends to look at it and make sure there's not some glaringly obvious flaw
 
 == LICENSE
 
